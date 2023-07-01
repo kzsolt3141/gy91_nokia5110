@@ -1,0 +1,12 @@
+[submodule "twi"]
+	path = twi
+	url = ../twi
+[submodule "mpu9250_i2c"]
+	path = mpu9250_i2c
+	url = ../mpu9250_i2c
+[submodule "bmp280_i2c"]
+	path = bmp280_i2c
+	url = ../bmp280_i2c
+[submodule "nokia5110"]
+	path = nokia5110
+	url = ../nokia5110
