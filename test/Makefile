@@ -3,11 +3,11 @@ F_CPU=8000000
 CC=avr-gcc
 OBJCOPY=avr-objcopy
 MEMCHECK=avr-size
-IFLAGS=-I../ -I../twi -I../mpu9250_i2c -I../bmp280_i2c -I../nokia5110
+IFLAGS=-I../ -I../twi -I../mpu9250_i2c -I../bmp280_i2c -I../nokia5110 -I ../spi
 
 CFLAGS=-std=c11 -Wall -g -O3 -mmcu=${MCU} -DF_CPU=${F_CPU} ${IFLAGS}
 TARGET=main
-SRCS=main.c ../mpu9250_i2c/MPU9250.c ../bmp280_i2c/BMP280.c ../nokia5110/nokia5110.c ../twi/twi.c
+SRCS=main.c ../mpu9250_i2c/MPU9250.c ../bmp280_i2c/BMP280.c ../nokia5110/nokia5110.c ../twi/twi.c ../spi/spi.c
 
 all:
 	${CC} ${CFLAGS} -o ${TARGET}.bin ${SRCS}

@@ -2,16 +2,21 @@
 #include "MPU9250.h"
 #include "BMP280.h"
 #include "nokia5110.h"
+#include "spi.h"
 
 #include <stdio.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
+static inline void spi_init_master() {
+    SPI_init_master(SPI_PS_4);
+}
+
 int main(void) {
     uint8_t sts;
     char message[100] = {0};
 
-    nokia_5110_init();
+    if (nokia_5110_init(spi_init_master, SPI_RW_byte)) return 1;
 
     // TWI init
     //-------------------------------
@@ -21,16 +26,16 @@ int main(void) {
     //-------------------------------
     register_MPU_cb(TWI_write_reg, TWI_read_reg_burst);
 
-    nokia_5110_write("MPU9250 calib:");
+    // nokia_5110_write("MPU9250 calib:");
 
     MPU9250_calib();
 
-    nokia_5110_write("done. ");
+    // nokia_5110_write("done. ");
 
     sts = MPU9250_init();
     if (sts) return sts;
 
-    nokia_5110_write("MPU9250 OK");
+    // nokia_5110_write("MPU9250 OK");
 
     MPU9250_data mpu_data = {};
 
@@ -41,8 +46,8 @@ int main(void) {
     sts = BMP280_init();
     if (sts) return sts;
 
-    nokia_5110_set_xy(0,3);
-    nokia_5110_write("BMP280 OK");
+    // nokia_5110_set_xy(0,3);
+    // nokia_5110_write("BMP280 OK");
 
     BMP280_final bmp_data = {};
 
