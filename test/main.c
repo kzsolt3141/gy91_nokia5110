@@ -75,16 +75,9 @@ int main(void) {
         nokia_5110_set_xy(0,3);
         nokia_5110_write(message);
 
-
-        // printf("%05d, %05d, %05d ", mpu_data.acc[0], mpu_data.acc[1], mpu_data.acc[2]);
-        // printf("%d, %d\n", (int16_t)(bmp_data.temp/256/100), (int16_t)(bmp_data.baro/256/100));
-
         snprintf(message, sizeof(message), "T %d, P %d", (int16_t)(bmp_data.temp/256/100), (int16_t)(bmp_data.baro/256/100));
         nokia_5110_set_xy(0,5);
         nokia_5110_write(message);
-
-        // printf("%05d, %05d, %05d\n", mpu_data.gyro[0], mpu_data.gyro[1], mpu_data.gyro[2]);
-        // printf("%05d, %05d, %05d\n", mpu_data.mag[0] - (min_mag[0] + max_mag[0]) / 2, mpu_data.mag[1] -  (min_mag[1] + max_mag[1]) / 2, mpu_data.mag[2] - (min_mag[2] + max_mag[2]) / 2);
 
         _delay_ms(500);
     }
