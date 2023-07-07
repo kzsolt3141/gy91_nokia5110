@@ -7,25 +7,22 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-typedef struct SPI_cb_ctx_t {
-    uint8_t data;
-    int intr_cnt;
-}SPI_cb_ctx;
+typedef struct SPI_Data_t {
+   MPU9250_data mpu_data;
+   BMP280_final bmp_data;
+} SPI_Data;
 
-SPI_cb_ctx ctx = {0};
-MPU9250_data mpu_data = {0};
-BMP280_final bmp_data = {0};
+SPI_Data spi_data = {0};
+const uint8_t max_idx = sizeof(SPI_Data);
 
 static void SPI_cb_handle(void* ctx) {
-    SPI_cb_ctx* t_ctx = (SPI_cb_ctx*)ctx;
+    const uint8_t *p = (uint8_t*)ctx;
 
-    t_ctx->data = SPDR;
-    t_ctx->intr_cnt++;
-
+    const uint8_t data = SPDR;
 
     if (SPCR & (1 << MSTR)) {
     } else {
-        SPDR = t_ctx->data;
+        SPDR = p[data % max_idx];
     }
 }
 
@@ -33,7 +30,7 @@ int main(void) {
     uint8_t sts;
     char message[20] = {0};
 
-    nokia_5110_init(SPI_cb_handle, &ctx);
+    nokia_5110_init(SPI_cb_handle, &spi_data);
 
     // TWI init
     //-------------------------------
@@ -67,29 +64,29 @@ int main(void) {
     nokia_5110_write("   A   |   G");
 
     while(1) {
-        MPU9250_get_data(&mpu_data);
-        BMP280_get_data(&bmp_data);
+        MPU9250_get_data(&spi_data.mpu_data);
+        BMP280_get_data(&spi_data.bmp_data);
 
-        snprintf(message, sizeof(message), "X%06d %06d", mpu_data.acc[0], mpu_data.gyro[0]);
+        snprintf(message, sizeof(message), "X%06d %06d", spi_data.mpu_data.acc[0], spi_data.mpu_data.gyro[0]);
         nokia_5110_set_xy(0,1);
         nokia_5110_write(message);
 
-        snprintf(message, sizeof(message), "Y%06d %06d", mpu_data.acc[1], mpu_data.gyro[1]);
+        snprintf(message, sizeof(message), "Y%06d %06d", spi_data.mpu_data.acc[1], spi_data.mpu_data.gyro[1]);
         nokia_5110_set_xy(0,2);
         nokia_5110_write(message);
 
-        snprintf(message, sizeof(message), "Z%06d %06d", mpu_data.acc[2], mpu_data.gyro[2]);
+        snprintf(message, sizeof(message), "Z%06d %06d", spi_data.mpu_data.acc[2], spi_data.mpu_data.gyro[2]);
         nokia_5110_set_xy(0,3);
         nokia_5110_write(message);
 
-        const int16_t a = bmp_data.temp/256/100;
-        const int16_t b = bmp_data.baro/256/100;
+        const int16_t a = spi_data.bmp_data.temp/256/100;
+        const int16_t b = spi_data.bmp_data.baro/256/100;
 
         snprintf(message, sizeof(message), "T %d, P %d", a, b);
         nokia_5110_set_xy(0,5);
         nokia_5110_write(message);
 
-        _delay_ms(300);
+        _delay_ms(100);
     }
 
     return sts;
