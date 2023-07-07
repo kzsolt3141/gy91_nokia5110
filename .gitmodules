@@ -10,3 +10,9 @@
 [submodule "nokia5110"]
 	path = nokia5110
 	url = ../nokia5110
+[submodule "spi"]
+	path = spi
+	url = ../spi
+[submodule "uart"]
+	path = uart
+	url = ../uart
