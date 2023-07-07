@@ -7,11 +7,33 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+typedef struct SPI_cb_ctx_t {
+    uint8_t data;
+    int intr_cnt;
+}SPI_cb_ctx;
+
+SPI_cb_ctx ctx = {0};
+MPU9250_data mpu_data = {0};
+BMP280_final bmp_data = {0};
+
+static void SPI_cb_handle(void* ctx) {
+    SPI_cb_ctx* t_ctx = (SPI_cb_ctx*)ctx;
+
+    t_ctx->data = SPDR;
+    t_ctx->intr_cnt++;
+
+
+    if (SPCR & (1 << MSTR)) {
+    } else {
+        SPDR = t_ctx->data;
+    }
+}
+
 int main(void) {
     uint8_t sts;
-    char message[100] = {0};
+    char message[20] = {0};
 
-    nokia_5110_init();
+    nokia_5110_init(SPI_cb_handle, &ctx);
 
     // TWI init
     //-------------------------------
@@ -32,8 +54,6 @@ int main(void) {
 
     // nokia_5110_write("MPU9250 OK");
 
-    MPU9250_data mpu_data = {};
-
     // BMP280 init
     //-------------------------------
     register_BMP_cb(TWI_write_reg, TWI_read_reg_burst);
@@ -44,18 +64,11 @@ int main(void) {
     // nokia_5110_set_xy(0,3);
     // nokia_5110_write("BMP280 OK");
 
-    BMP280_final bmp_data = {};
-
-    _delay_ms(2000);
-
-    nokia_5110_clear();
     nokia_5110_write("   A   |   G");
 
     while(1) {
         MPU9250_get_data(&mpu_data);
         BMP280_get_data(&bmp_data);
-
-        // printf("%05d\n", mpu_data.tmp);
 
         snprintf(message, sizeof(message), "X%06d %06d", mpu_data.acc[0], mpu_data.gyro[0]);
         nokia_5110_set_xy(0,1);
@@ -69,11 +82,14 @@ int main(void) {
         nokia_5110_set_xy(0,3);
         nokia_5110_write(message);
 
-        snprintf(message, sizeof(message), "T %d, P %d", (int16_t)(bmp_data.temp/256/100), (int16_t)(bmp_data.baro/256/100));
+        const int16_t a = bmp_data.temp/256/100;
+        const int16_t b = bmp_data.baro/256/100;
+
+        snprintf(message, sizeof(message), "T %d, P %d", a, b);
         nokia_5110_set_xy(0,5);
         nokia_5110_write(message);
 
-        _delay_ms(500);
+        _delay_ms(300);
     }
 
     return sts;
